@@ -4,6 +4,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from scipy.spatial.distance import cdist
+from sklearn.metrics import log_loss
 import os
 
 result_dir = "results"
@@ -19,9 +20,12 @@ def generate_ellipsoid_clusters(distance, n_samples=100, cluster_std=0.5):
     y1 = np.zeros(n_samples)
 
     # Generate the second cluster (class 1)
-    X2 = np.random.multivariate_normal(mean=[1 + distance, 1 + distance], cov=covariance_matrix, size=n_samples)
+    X2 = np.random.multivariate_normal(mean=[1, 1], cov=covariance_matrix, size=n_samples)
     
     # Implement: Shift the second cluster along the x-axis and y-axis for a given distance
+    shift_direction = np.array([1, -1]) / np.sqrt(2)  # Unit vector along y = -x
+    shift_vector = distance * shift_direction
+    X2 += shift_vector
     
     y2 = np.ones(n_samples)
 
@@ -65,8 +69,7 @@ def do_experiments(start, end, step_num):
         plt.scatter(X[y == 1, 0], X[y == 1, 1], color='red', label='Class 1')
 
         # Implement: Calculate and store logistic loss
-        logistic_loss = -np.mean(y * np.log(model.predict_proba(X)[:, 1]) + 
-                                 (1 - y) * np.log(1 - model.predict_proba(X)[:, 1]))
+        logistic_loss = log_loss(y, model.predict_proba(X))
         loss_list.append(logistic_loss)
 
         # Calculate margin width between 70% confidence contours for each class
@@ -82,6 +85,12 @@ def do_experiments(start, end, step_num):
 
         slope_list.append(slope)
         intercept_list.append(intercept)
+
+        x_values = np.array([x_min, x_max])
+
+        y_values = slope * x_values + intercept
+
+        plt.plot(x_values, y_values, color='green', linestyle='--', label='Decision Boundary')
 
         # Plot fading red and blue contours for confidence levels
         contour_levels = [0.7, 0.8, 0.9]
@@ -144,7 +153,6 @@ def do_experiments(start, end, step_num):
     plt.title("Shift Distance vs Beta1 / Beta2 (Slope)")
     plt.xlabel("Shift Distance")
     plt.ylabel("Beta1 / Beta2")
-    plt.ylim(-2, 0)
 
     # Implement: Plot beta0 / beta2 (Intercept ratio)
     plt.subplot(3, 3, 5)
