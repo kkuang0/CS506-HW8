@@ -1,7 +1,7 @@
 # Assignment 8: Logistic Regression
 
 ---
-Video Link: [[dELjZHOhryk](https://youtu.be/dELjZHOhryk)](https://youtu.be/dELjZHOhryk)
+Video Link: https://youtu.be/dELjZHOhryk
 
 **Goals**:
 
